@@ -1,6 +1,13 @@
+INTENT_USER_FEEDBACK = "intent-user-feedback";
+
 window.onload = function () {
     document.getElementById('submit_button').addEventListener('click', onSubmitForm, false);
     document.getElementById('refresh_button').addEventListener('click', onRefreshForm, false);
+}
+function onRefreshForm() {
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("message").value = "";
 }
 function onSubmitForm(e) {
     e.preventDefault();
@@ -26,6 +33,32 @@ function onSubmitForm(e) {
     if (errorCount > 0) {
         alert(errors);
     } else {
-        alert("Thank you " + name + ". Your comments `" + comment + "` have been received. We shall send a response to " + email + " soon");
+
+        var requestUrl = "backend/php/contacts.php";
+        var requestParams = "email=" + email + "&comment=" + comment + "&name=" + name;
+        var requestIntent = INTENT_USER_FEEDBACK;
+        sendPOSTHttpRequest(requestUrl, requestParams, requestIntent);
+    }
+}
+
+
+function onSuccessfulXHR(request_intent, xhr, response) {
+    switch (request_intent) {
+        case INTENT_USER_FEEDBACK:
+            alert(response);
+            onRefreshForm();
+            break;
+        default :
+            alert("Cannot perform action[" + request_intent + "]");
+    }
+}
+
+function onFailedXHR(request_intent, xhr) {
+    switch (request_intent) {
+        case INTENT_USER_FEEDBACK:
+            alert("You have a server error");
+            break;
+        default :
+            alert("Cannot perform action[" + request_intent + "]");
     }
 }
