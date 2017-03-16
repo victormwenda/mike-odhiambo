@@ -3,6 +3,7 @@
 /* @var $this yii\web\View */
 
 $this->title = 'Assignment 3';
+
 ?>
 <div class="site-index">
 

@@ -1,19 +1,19 @@
 <?php
 
-namespace common\database\core;
+namespace app\database\core;
 
 /**
-*
-* DatabaseActions
-*
-* Contains declaration of various database actions
-*
-* This source code is auto-generated
-*
-* @author Victor Mwenda
-* Email : vmwenda.vm@gmail.com
-* Phone : +254(0)718034449
-*/
+ *
+ * DatabaseActions
+ *
+ * Contains declaration of various database actions
+ *
+ * This source code is auto-generated
+ *
+ * @author Victor Mwenda
+ * Email : vmwenda.vm@gmail.com
+ * Phone : +254(0)718034449
+ */
 class DatabaseActions
 {
 
