@@ -10,9 +10,6 @@ namespace app\database\core;
  *
  * This source code is auto-generated
  *
- * @author Victor Mwenda
- * Email : vmwenda.vm@gmail.com
- * Phone : +254(0)718034449
  */
 class DatabaseActions
 {

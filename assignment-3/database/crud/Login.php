@@ -7,23 +7,6 @@ use app\database\core\InvalidColumnValueMatchException;
 use app\database\core\NullabilityException;
 
 /**
- * THIS SOURCE CODE WAS AUTOMATICALLY GENERATED ON Sat 10:59:00  18/03/2017
- *
- *
- * DATABASE CRUD GENERATOR IS AN OPEN SOURCE PROJECT. TO IMPROVE ON THIS PROJECT BY
- * ADDING MODULES, FIXING BUGS e.t.c GET THE SOURCE CODE FROM GIT (https://github.com/marviktintor/dbcrudgen/)
- *
- * DATABASE CRUD GENERATOR INFO:
- *
- * DEVELOPER : VICTOR MWENDA
- * VERSION : DEVELOPER PREVIEW 0.1
- * SUPPORTED LANGUAGES : PHP
- * DEVELOPER EMAIL : vmwenda.vm@gmail.com
- *
- */
-
-
-/**
  *
  * Login
  *
@@ -31,9 +14,6 @@ use app\database\core\NullabilityException;
  *
  * This source code is auto-generated
  *
- * @author Victor Mwenda
- * Email : vmwenda.vm@gmail.com
- * Phone : +254(0)718034449
  */
 class Login
 {
