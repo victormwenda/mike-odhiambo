@@ -50,10 +50,6 @@ class DatabaseUtils
 
     private $database_handle;
 
-    public function __destruct()
-    {
-    }
-
     public function __construct($host = "localhost", $user = "root", $password = "", $database = "users")
     {
 
@@ -62,6 +58,9 @@ class DatabaseUtils
         $this->database_handle = $this->database_connection->open_database_connection();
     }
 
+    public function __destruct()
+    {
+    }
 
     /**
      * Deletes a table from the database
@@ -436,6 +435,23 @@ class DatabaseUtils
     }
 
     /**
+     * Performs a query on a table and returns an associative array of the query results
+     *
+     * @param $table
+     * @param array $columns
+     * @param array $records
+     * @param string $extraSQL
+     * @param bool $printSQL
+     * @return array associative
+     * @throws InvalidColumnValueMatchException
+     * @throws NullabilityException
+     */
+    public function query($table, Array $columns, Array $records, $extraSQL = "", $printSQL = false)
+    {
+        return $this->fetch_assoc(false, $table, $columns, $records, $extraSQL, $printSQL);
+    }
+
+    /**
      * Performs a query and returns an associative array of the query
      *
      * @param $distinct
@@ -515,23 +531,6 @@ class DatabaseUtils
             }
             throw new InvalidColumnValueMatchException ('Invalid query,' . $message);
         }
-    }
-
-    /**
-     * Performs a query on a table and returns an associative array of the query results
-     *
-     * @param $table
-     * @param array $columns
-     * @param array $records
-     * @param string $extraSQL
-     * @param bool $printSQL
-     * @return array associative
-     * @throws InvalidColumnValueMatchException
-     * @throws NullabilityException
-     */
-    public function query($table, Array $columns, Array $records, $extraSQL = "", $printSQL = false)
-    {
-        return $this->fetch_assoc(false, $table, $columns, $records, $extraSQL, $printSQL);
     }
 
     /**
@@ -649,6 +648,16 @@ class DatabaseUtils
     }
 
     /**
+     * Performs a raw SQL
+     * @param $query
+     * @return bool|\mysqli_result
+     */
+    public function rawSQL($query)
+    {
+        return $this->database_handle->query($query); // Perform Raw SQL Query
+    }
+
+    /**
      * Does a raw insert
      * @param $query
      * @return bool|\mysqli_result
@@ -659,29 +668,6 @@ class DatabaseUtils
     }
 
     /**
-     * Performs a raw sql query
-     * @param $query
-     * @return array
-     * @throws NullabilityException
-     */
-    public function rawQuery($query)
-    {
-        if (empty ($query)) {
-            throw new NullabilityException ("The query name cannot be null");
-        }
-
-        $results = array();
-
-        $exec = $this->rawSQL($query);
-
-        while ($assoc = $exec->fetch_assoc()) {
-            $results [count($results)] = $assoc; // Return rows
-        }
-
-        return $results;
-    }
-
-    /**
      * Does a raw update
      * @param $query
      * @return bool|\mysqli_result
@@ -689,16 +675,6 @@ class DatabaseUtils
     public function rawUpdate($query)
     {
         return $this->rawSQL($query);
-    }
-
-    /**
-     * Performs a raw SQL
-     * @param $query
-     * @return bool|\mysqli_result
-     */
-    public function rawSQL($query)
-    {
-        return $this->database_handle->query($query); // Perform Raw SQL Query
     }
 
     /**
@@ -735,6 +711,19 @@ class DatabaseUtils
     }
 
     /**
+     * Optimize all the tables in a database
+     * @param null $database
+     */
+    public function optimizeDatabaseTables($database = null)
+    {
+        $tables = $this->getDatabaseTables($database);
+
+        foreach ($tables as $table) {
+            $this->rawSQL("OPTIMIZE TABLE " . $table);
+        }
+    }
+
+    /**
      * Get the list of all tables in the database
      * @param null $database
      * @return array
@@ -760,18 +749,27 @@ class DatabaseUtils
     }
 
     /**
-     * Optimize all the tables in a database
-     * @param null $database
+     * Performs a raw sql query
+     * @param $query
+     * @return array
+     * @throws NullabilityException
      */
-    public function optimizeDatabaseTables($database = null)
+    public function rawQuery($query)
     {
-        $tables = $this->getDatabaseTables($database);
-
-        foreach ($tables as $table) {
-            $this->rawSQL("OPTIMIZE TABLE " . $table);
+        if (empty ($query)) {
+            throw new NullabilityException ("The query name cannot be null");
         }
-    }
 
+        $results = array();
+
+        $exec = $this->rawSQL($query);
+
+        while ($assoc = $exec->fetch_assoc()) {
+            $results [count($results)] = $assoc; // Return rows
+        }
+
+        return $results;
+    }
 
     /**
      * Prepare an OR search
@@ -785,20 +783,6 @@ class DatabaseUtils
     public function prepareSearchOR($table, $columns = null, $options = null, $extraSQL = "", $printSQL = false)
     {
         return $this->prepareSearch($table, $columns, $options, " OR ", $extraSQL, $printSQL);
-    }
-
-    /**
-     * Prepare an AND search
-     * @param $table
-     * @param array|null $columns
-     * @param array|null $options
-     * @param string $extraSQL
-     * @param bool $printSQL
-     * @return array
-     */
-    public function prepareSearchAND($table, Array $columns = null, Array $options = null, $extraSQL = "", $printSQL = false)
-    {
-        return $this->prepareSearch($table, $columns, $options, " AND ", $extraSQL, $printSQL);
     }
 
     /**
@@ -856,6 +840,20 @@ class DatabaseUtils
     }
 
     /**
+     * Prepare an AND search
+     * @param $table
+     * @param array|null $columns
+     * @param array|null $options
+     * @param string $extraSQL
+     * @param bool $printSQL
+     * @return array
+     */
+    public function prepareSearchAND($table, Array $columns = null, Array $options = null, $extraSQL = "", $printSQL = false)
+    {
+        return $this->prepareSearch($table, $columns, $options, " AND ", $extraSQL, $printSQL);
+    }
+
+    /**
      * Prepare an OR query
      * @param $table
      * @param array|null $columns
@@ -867,20 +865,6 @@ class DatabaseUtils
     public function prepareQueryOR($table, $columns = null, $options = null, $extraSQL = "", $printSQL = false)
     {
         return $this->prepareQuery($table, $columns, $options, " OR ", $extraSQL, $printSQL);
-    }
-
-    /**
-     * Prepare an AND query
-     * @param $table
-     * @param array|null $columns
-     * @param array|null $options
-     * @param string $extraSQL
-     * @param bool $printSQL
-     * @return array
-     */
-    public function prepareQueryAND($table, Array $columns = null, Array $options = null, $extraSQL = "", $printSQL = false)
-    {
-        return $this->prepareQuery($table, $columns, $options, " AND ", $extraSQL, $printSQL);
     }
 
     /**
@@ -935,6 +919,20 @@ class DatabaseUtils
         }
 
         return $this->rawQuery($query);
+    }
+
+    /**
+     * Prepare an AND query
+     * @param $table
+     * @param array|null $columns
+     * @param array|null $options
+     * @param string $extraSQL
+     * @param bool $printSQL
+     * @return array
+     */
+    public function prepareQueryAND($table, Array $columns = null, Array $options = null, $extraSQL = "", $printSQL = false)
+    {
+        return $this->prepareQuery($table, $columns, $options, " AND ", $extraSQL, $printSQL);
     }
 
 }

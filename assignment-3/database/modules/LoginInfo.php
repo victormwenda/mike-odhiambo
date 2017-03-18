@@ -51,18 +51,18 @@ class LoginInfo
 
     /**
      * Inserts data into the table[login] in the order below
-     * array ('user_id','username','password','access_token')
+     * array ('id','username','password','authKey','accessToken')
      * is mappped into
-     * array ($user_id,$username,$password,$access_token)
+     * array ($id,$username,$password,$authKey,$accessToken)
      * @return 1 if data was inserted,0 otherwise
      * if redundancy check is true, it inserts if the record if it never existed else.
      * if the record exists, it returns the number of times the record exists on the relation
      */
-    public function insert($user_id, $username, $password, $access_token, $redundancy_check = false, $printSQL = false)
+    public function insert($id, $username, $password, $authKey, $accessToken, $redundancy_check = false, $printSQL = false)
     {
-        $columns = array('user_id', 'username', 'password', 'access_token');
-        $records = array($user_id, $username, $password, $access_token);
-        return $this->login->insert_prepared_records($user_id, $username, $password, $access_token, $redundancy_check, $printSQL);
+        $columns = array('id', 'username', 'password', 'authKey', 'accessToken');
+        $records = array($id, $username, $password, $authKey, $accessToken);
+        return $this->login->insert_prepared_records($id, $username, $password, $authKey, $accessToken, $redundancy_check, $printSQL);
     }
 
 
@@ -82,6 +82,75 @@ class LoginInfo
         }
         if ($this->build == "user-build") {
             return $this->query_user_build($queried_login);
+        }
+    }
+
+    public function query_eng_build($queried_login)
+    {
+        if ($this->client == "web-desktop") {
+            return $this->export_query_html($queried_login);
+        }
+        if ($this->client == "mobile-android") {
+            return $this->export_query_json($queried_login);
+        }
+    }
+
+    public function export_query_html($queried_login)
+    {
+        $query_html = "";
+        foreach ($queried_login as $login_row_items) {
+            $query_html .= $this->process_query_for_html_export($login_row_items);
+        }
+        return $query_html;
+    }
+
+    private function process_query_for_html_export($login_row_items)
+    {
+        $html_export = '<div style="padding:10px;margin:10px;border:2px solid black;"><h3>' . $this->table . '</h3>';
+
+        $id = $login_row_items ['id'];
+        if ($id != null) {
+            $html_export .= $this->parseHtmlExport('id', $id);
+        }
+        $username = $login_row_items ['username'];
+        if ($username != null) {
+            $html_export .= $this->parseHtmlExport('username', $username);
+        }
+        $password = $login_row_items ['password'];
+        if ($password != null) {
+            $html_export .= $this->parseHtmlExport('password', $password);
+        }
+        $authKey = $login_row_items ['authKey'];
+        if ($authKey != null) {
+            $html_export .= $this->parseHtmlExport('authKey', $authKey);
+        }
+        $accessToken = $login_row_items ['accessToken'];
+        if ($accessToken != null) {
+            $html_export .= $this->parseHtmlExport('accessToken', $accessToken);
+        }
+
+
+        return $html_export .= '</div>';
+    }
+
+    private function parseHtmlExport($title, $message)
+    {
+        return '<div style="width:400px;"><h4>' . $title . '</h4><hr /><p>' . $message . '</p></div>';
+    }
+
+    public function export_query_json($queried_login)
+    {
+        $query_json = json_encode($queried_login);
+        return $query_json;
+    }
+
+    public function query_user_build($queried_login)
+    {
+        if ($this->client == "web-desktop") {
+            return $this->export_query_html($queried_login);
+        }
+        if ($this->client == "mobile-android") {
+            return $this->export_query_json($queried_login);
         }
     }
 
@@ -130,70 +199,5 @@ class LoginInfo
         if ($this->build == "user-build") {
             return $this->query_user_build($queried_login);
         }
-    }
-
-    public function query_eng_build($queried_login)
-    {
-        if ($this->client == "web-desktop") {
-            return $this->export_query_html($queried_login);
-        }
-        if ($this->client == "mobile-android") {
-            return $this->export_query_json($queried_login);
-        }
-    }
-
-    public function query_user_build($queried_login)
-    {
-        if ($this->client == "web-desktop") {
-            return $this->export_query_html($queried_login);
-        }
-        if ($this->client == "mobile-android") {
-            return $this->export_query_json($queried_login);
-        }
-    }
-
-    public function export_query_json($queried_login)
-    {
-        $query_json = json_encode($queried_login);
-        return $query_json;
-    }
-
-    public function export_query_html($queried_login)
-    {
-        $query_html = "";
-        foreach ($queried_login as $login_row_items) {
-            $query_html .= $this->process_query_for_html_export($login_row_items);
-        }
-        return $query_html;
-    }
-
-    private function process_query_for_html_export($login_row_items)
-    {
-        $html_export = '<div style="padding:10px;margin:10px;border:2px solid black;"><h3>' . $this->table . '</h3>';
-
-        $user_id = $login_row_items ['user_id'];
-        if ($user_id != null) {
-            $html_export .= $this->parseHtmlExport('user_id', $user_id);
-        }
-        $username = $login_row_items ['username'];
-        if ($username != null) {
-            $html_export .= $this->parseHtmlExport('username', $username);
-        }
-        $password = $login_row_items ['password'];
-        if ($password != null) {
-            $html_export .= $this->parseHtmlExport('password', $password);
-        }
-        $access_token = $login_row_items ['access_token'];
-        if ($access_token != null) {
-            $html_export .= $this->parseHtmlExport('access_token', $access_token);
-        }
-
-
-        return $html_export .= '</div>';
-    }
-
-    private function parseHtmlExport($title, $message)
-    {
-        return '<div style="width:400px;"><h4>' . $title . '</h4><hr /><p>' . $message . '</p></div>';
     }
 } ?>
